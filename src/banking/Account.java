@@ -6,18 +6,24 @@ import java.util.Scanner;
 public class Account {
 
     static void createAccount() throws SQLException {
-        System.out.println();
-        System.out.println("Your card has been created");
-        System.out.println("Your card number:");
         String cardNumber = NumberGenerator.generate();
-        String pin = NumberGenerator.generatePin();
-        System.out.println(cardNumber);
-        System.out.println("Your card PIN:");
-        System.out.println(pin);
-        System.out.println();
-        String dbQuery = "INSERT INTO card (number, pin, balance) VALUES ( '" + cardNumber + "', '" + pin + "', " + 0 + ");";
-        DatabaseConnect.connectDatabase(Main.dbUrl, dbQuery);
-        MainMenu.printMenu();
+        String dbQuery2 = "SELECT EXISTS(SELECT number FROM card WHERE number= '" + cardNumber + "') ;";
+        boolean cardExists = DatabaseConnect.readDatabaseBoolean(Main.dbUrl, dbQuery2);
+        if (cardExists) {
+            createAccount();
+        } else {
+            System.out.println();
+            System.out.println("Your card has been created");
+            System.out.println("Your card number:");
+            System.out.println(cardNumber);
+            String pin = NumberGenerator.generatePin();
+            System.out.println("Your card PIN:");
+            System.out.println(pin);
+            System.out.println();
+            String dbQuery = "INSERT INTO card (number, pin, balance) VALUES ( '" + cardNumber + "', '" + pin + "', " + 0 + ");";
+            DatabaseConnect.connectDatabase(Main.dbUrl, dbQuery);
+            MainMenu.printMenu();
+        }
     }
 
     static void logAccount() throws SQLException {
@@ -70,7 +76,7 @@ public class Account {
         String cardToTransfer = scanner.next();
         String dbQuery2 = "SELECT EXISTS(SELECT number FROM card WHERE number= '" + cardToTransfer + "') ;";
         boolean cardToTransferExists = DatabaseConnect.readDatabaseBoolean(Main.dbUrl, dbQuery2);
-        System.out.println(cardToTransferExists);
+
         if (!NumberGenerator.verifyNumber(cardToTransfer)) {
 
             System.out.println("Probably you made a mistake in the card number. Please try again!");
